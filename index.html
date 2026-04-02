@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="PSA Tracker">
+<title>PSA Tracker</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; background: #f2f2f7; color: #1c1c1e; min-height: 100vh; }
+
+  header { background: white; padding: 16px 20px 12px; border-bottom: 1px solid #e5e5ea; position: sticky; top: 0; z-index: 10; }
+  header h1 { font-size: 20px; font-weight: 600; }
+  header p { font-size: 13px; color: #8e8e93; margin-top: 2px; }
+
+  .container { max-width: 480px; margin: 0 auto; padding: 16px; }
+
+  .mic-wrap { text-align: center; padding: 24px 0 16px; }
+  .mic-btn { width: 88px; height: 88px; border-radius: 50%; border: 2px solid #e5e5ea; background: white; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; transition: all 0.2s; -webkit-tap-highlight-color: transparent; }
+  .mic-btn:active { transform: scale(0.95); }
+  .mic-btn.listening { border-color: #ff3b30; background: #fff0ef; animation: pulse 1.2s infinite; }
+  .mic-btn svg { width: 36px; height: 36px; color: #1c1c1e; }
+  .mic-btn.listening svg { color: #ff3b30; }
+  @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.07)} }
+
+  .status { font-size: 14px; color: #8e8e93; text-align: center; margin-top: 8px; min-height: 20px; }
+  .status.ok { color: #34c759; }
+  .status.err { color: #ff3b30; }
+  .transcript { font-size: 12px; color: #aeaeb2; text-align: center; min-height: 16px; font-style: italic; margin-top: 4px; padding: 0 20px; }
+  .hint { font-size: 12px; color: #aeaeb2; text-align: center; margin-top: 6px; line-height: 1.6; padding: 0 20px; }
+
+  .card { background: white; border-radius: 12px; overflow: hidden; margin-bottom: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+  .card-title { font-size: 11px; font-weight: 600; color: #8e8e93; text-transform: uppercase; letter-spacing: 0.5px; padding: 10px 16px 6px; }
+  .field { display: flex; align-items: center; padding: 11px 16px; border-top: 0.5px solid #f2f2f7; }
+  .field:first-of-type { border-top: none; }
+  .field label { font-size: 15px; color: #1c1c1e; flex: 0 0 130px; }
+  .field input, .field select { flex: 1; border: none; outline: none; font-size: 15px; color: #007aff; background: transparent; text-align: right; font-family: inherit; min-width: 0; }
+  .field input::placeholder { color: #c7c7cc; }
+  .field select { -webkit-appearance: none; appearance: none; }
+
+  .pl-row { display: flex; gap: 8px; justify-content: center; padding: 10px 16px; }
+  .pl-badge { font-size: 13px; padding: 3px 10px; border-radius: 99px; font-weight: 500; }
+  .pl-pos { background: #e8f8ed; color: #1d7a3a; }
+  .pl-neg { background: #fff0ef; color: #c0392b; }
+
+  .btn-row { display: flex; gap: 10px; margin-top: 4px; }
+  .btn { flex: 1; padding: 14px; border-radius: 12px; border: none; font-size: 16px; font-weight: 500; cursor: pointer; transition: opacity 0.15s; -webkit-tap-highlight-color: transparent; }
+  .btn:active { opacity: 0.7; }
+  .btn.secondary { background: white; color: #ff3b30; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+  .btn.primary { background: #007aff; color: white; }
+  .btn.primary:disabled { background: #aeaeb2; cursor: not-allowed; }
+
+  .save-status { font-size: 14px; text-align: center; min-height: 20px; margin-top: 10px; }
+  .save-status.ok { color: #34c759; }
+  .save-status.err { color: #ff3b30; }
+
+  .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #1c1c1e; color: white; padding: 12px 20px; border-radius: 99px; font-size: 14px; font-weight: 500; opacity: 0; transition: opacity 0.3s; pointer-events: none; white-space: nowrap; z-index: 100; }
+  .toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🃏 PSA Tracker</h1>
+  <p>Voice-powered card entry</p>
+</header>
+
+<div class="container">
+
+  <div class="mic-wrap">
+    <button class="mic-btn" id="micBtn" onclick="toggleListen()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="9" y="2" width="6" height="12" rx="3"/>
+        <path d="M5 10a7 7 0 0 0 14 0"/>
+        <line x1="12" y1="19" x2="12" y2="22"/>
+        <line x1="8" y1="22" x2="16" y2="22"/>
+      </svg>
+    </button>
+    <div class="status" id="statusMsg">Tap the mic and speak</div>
+    <div class="transcript" id="transcript"></div>
+    <div class="hint">Say: "Charizard ex, set MEW, 199 slash 165, Pit, 150 euros, today"</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Card info</div>
+    <div class="field"><label>Card name</label><input id="f_card" placeholder="Charizard ex" /></div>
+    <div class="field"><label>Set</label><input id="f_set" placeholder="MEW" /></div>
+    <div class="field"><label>Number</label><input id="f_number" placeholder="199/165" /></div>
+    <div class="field">
+      <label>Owner</label>
+      <select id="f_owner">
+        <option value="P">Pit</option>
+        <option value="T">Tom</option>
+        <option value="S">Shared</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Submission</div>
+    <div class="field"><label>Purchase price (€)</label><input id="f_purchase" type="number" placeholder="0.00" inputmode="decimal" oninput="updatePL()" /></div>
+    <div class="field"><label>Submission cost (€)</label><input id="f_subcost" type="number" placeholder="25.00" value="25" inputmode="decimal" oninput="updatePL()" /></div>
+    <div class="field"><label>Date</label><input id="f_date" placeholder="DD.MM.YYYY" /></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Results (optional)</div>
+    <div class="field">
+      <label>PSA grade</label>
+      <select id="f_grade">
+        <option value="">Pending</option>
+        <option value="10">10 – Gem Mint</option>
+        <option value="9">9 – Mint</option>
+        <option value="8">8 – NM-MT</option>
+        <option value="7">7 – Near Mint</option>
+        <option value="6">6 – Excellent-MT</option>
+        <option value="5">5 – Excellent</option>
+        <option value="raw">RAW</option>
+      </select>
+    </div>
+    <div class="field"><label>Graded value (€)</label><input id="f_gvalue" type="number" placeholder="0.00" inputmode="decimal" oninput="updatePL()" /></div>
+    <div class="field"><label>Sale price (€)</label><input id="f_sale" placeholder='number or H if held' oninput="updatePL()" /></div>
+    <div class="pl-row">
+      <span id="pl_graded" style="display:none" class="pl-badge"></span>
+      <span id="pl_sale" style="display:none" class="pl-badge"></span>
+    </div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn secondary" onclick="clearAll()">Clear</button>
+    <button class="btn primary" id="saveBtn" onclick="saveToSheet()">Save to Sheet</button>
+  </div>
+  <div class="save-status" id="saveStatus"></div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const SHEET_ID = '1lKdn5IxE7Q6Wa-V-H243mK_X4ApOqW5gzmNmfLHcI3U';
+const API_KEY = 'AIzaSyCSp9mW6o0oDVhQ_Yz0kjoNwh-rpZngp8Y';
+const SHEET_NAME = 'Pit';
+
+let recognition = null;
+let listening = false;
+
+function initRecognition() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) { setStatus('Voice not supported. Use Chrome.', 'err'); return null; }
+  const r = new SR();
+  r.lang = 'en-US';
+  r.interimResults = true;
+  r.maxAlternatives = 1;
+  r.onresult = (e) => {
+    const t = Array.from(e.results).map(r => r[0].transcript).join('');
+    document.getElementById('transcript').textContent = t;
+    if (e.results[e.results.length - 1].isFinal) { parseVoice(t); stopListen(); }
+  };
+  r.onerror = (e) => { setStatus('Mic error: ' + e.error, 'err'); stopListen(); };
+  r.onend = () => stopListen();
+  return r;
+}
+
+function toggleListen() {
+  if (listening) { stopListen(); return; }
+  if (!recognition) recognition = initRecognition();
+  if (!recognition) return;
+  listening = true;
+  document.getElementById('micBtn').classList.add('listening');
+  setStatus('Listening…');
+  recognition.start();
+}
+
+function stopListen() {
+  listening = false;
+  document.getElementById('micBtn').classList.remove('listening');
+  if (recognition) try { recognition.stop(); } catch(e) {}
+  if (document.getElementById('statusMsg').textContent === 'Listening…') setStatus('Tap the mic and speak');
+}
+
+function setStatus(msg, cls) {
+  const el = document.getElementById('statusMsg');
+  el.textContent = msg;
+  el.className = 'status' + (cls ? ' ' + cls : '');
+}
+
+function parseVoice(text) {
+  const t = text.toLowerCase();
+
+  if (/\bpit\b/.test(t)) setVal('f_owner', 'P');
+  else if (/\btom\b/.test(t)) setVal('f_owner', 'T');
+  else if (/\bshared\b/.test(t)) setVal('f_owner', 'S');
+
+  if (/\btoday\b/.test(t)) {
+    const n = new Date();
+    setVal('f_date', pad(n.getDate())+'.'+pad(n.getMonth()+1)+'.'+n.getFullYear());
+  }
+  const dm = t.match(/(\d{1,2})[.\/-](\d{1,2})[.\/-](\d{2,4})/);
+  if (dm) setVal('f_date', dm[0].replace(/\//g,'.'));
+
+  const sm = t.match(/\bset\s+([a-z0-9]+)/i);
+  if (sm) setVal('f_set', sm[1].toUpperCase());
+
+  const nm = text.match(/(\d+)\s*(?:slash|\/)\s*(\d+)/i);
+  if (nm) setVal('f_number', nm[1]+'/'+nm[2]);
+
+  const prices = [...t.matchAll(/(\d+(?:\.\d+)?)\s*(?:euro|euros|€)/g)].map(m => parseFloat(m[1]));
+  if (prices.length >= 1) setVal('f_purchase', prices[0]);
+  if (prices.length >= 2) setVal('f_subcost', prices[1]);
+
+  const gm = t.match(/(?:grade|psa)\s*(\d+|raw)/i);
+  if (gm) setVal('f_grade', gm[1].toLowerCase() === 'raw' ? 'raw' : gm[1]);
+
+  if (/\bheld\b|\bhold\b/.test(t)) setVal('f_sale', 'H');
+  const saleM = t.match(/(?:sold?\s+for|sale(?:\s+price)?)\s+(\d+(?:\.\d+)?)/i);
+  if (saleM) setVal('f_sale', saleM[1]);
+
+  let name = text
+    .replace(/\b(pit|tom|shared|today|set\s+\S+|number\s+\S+|\d+\s*(?:slash|\/)\s*\d+|\d+(?:\.\d+)?\s*(?:euro|euros|€)|grade\s*\d+|psa\s*\d+|sold?\s+for\s+\d+|held|hold)\b/gi, '')
+    .replace(/\s+/g, ' ').trim();
+  if (name.length > 2) setVal('f_card', name);
+
+  updatePL();
+  setStatus('Got it! Check the fields below.', 'ok');
+}
+
+function setVal(id, val) {
+  const el = document.getElementById(id);
+  if (el) el.value = val;
+}
+
+function pad(n) { return String(n).padStart(2,'0'); }
+
+function updatePL() {
+  const pp = parseFloat(document.getElementById('f_purchase').value) || 0;
+  const sc = parseFloat(document.getElementById('f_subcost').value) || 0;
+  const gv = parseFloat(document.getElementById('f_gvalue').value) || 0;
+  const sp = document.getElementById('f_sale').value.trim().toUpperCase();
+  const gb = document.getElementById('pl_graded');
+  const sb = document.getElementById('pl_sale');
+  if (gv > 0) {
+    const pl = gv - pp - sc;
+    gb.textContent = 'Graded P/L: ' + (pl>=0?'+':'') + pl.toFixed(2) + ' €';
+    gb.className = 'pl-badge ' + (pl>=0?'pl-pos':'pl-neg');
+    gb.style.display = 'inline';
+  } else { gb.style.display = 'none'; }
+  if (sp !== '' && sp !== 'H') {
+    const spv = parseFloat(sp) || 0;
+    const pl = spv - pp - sc;
+    sb.textContent = 'Sale P/L: ' + (pl>=0?'+':'') + pl.toFixed(2) + ' €';
+    sb.className = 'pl-badge ' + (pl>=0?'pl-pos':'pl-neg');
+    sb.style.display = 'inline';
+  } else { sb.style.display = 'none'; }
+}
+
+function clearAll() {
+  ['f_card','f_set','f_number','f_gvalue','f_sale','f_purchase'].forEach(id => setVal(id, ''));
+  setVal('f_owner', 'P');
+  setVal('f_grade', '');
+  setVal('f_subcost', '25');
+  const n = new Date();
+  setVal('f_date', pad(n.getDate())+'.'+pad(n.getMonth()+1)+'.'+n.getFullYear());
+  document.getElementById('transcript').textContent = '';
+  document.getElementById('pl_graded').style.display = 'none';
+  document.getElementById('pl_sale').style.display = 'none';
+  document.getElementById('saveStatus').textContent = '';
+  setStatus('Tap the mic and speak');
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+async function getNextRow() {
+  const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${SHEET_NAME}!B:B?key=${API_KEY}`;
+  const res = await fetch(url);
+  const data = await res.json();
+  return (data.values ? data.values.length : 1) + 1;
+}
+
+async function saveToSheet() {
+  const card = document.getElementById('f_card').value.trim();
+  if (!card) { showToast('Please enter a card name'); return; }
+
+  const btn = document.getElementById('saveBtn');
+  btn.disabled = true;
+  btn.textContent = 'Saving…';
+
+  try {
+    const nextRow = await getNextRow();
+    const pp = parseFloat(document.getElementById('f_purchase').value) || 0;
+    const sc = parseFloat(document.getElementById('f_subcost').value) || 0;
+    const gv = parseFloat(document.getElementById('f_gvalue').value) || null;
+    const spRaw = document.getElementById('f_sale').value.trim().toUpperCase();
+    const sp = (spRaw === 'H' || spRaw === '') ? spRaw : (parseFloat(spRaw) || null);
+    const grade = document.getElementById('f_grade').value;
+    const gradedPL = gv !== null ? (gv - pp - sc) : -(pp + sc);
+    const salePL = (sp !== '' && sp !== 'H' && sp !== null) ? (sp - pp - sc) : 0;
+
+    const row = [
+      '',
+      card,
+      document.getElementById('f_set').value.trim().toUpperCase(),
+      document.getElementById('f_number').value.trim(),
+      document.getElementById('f_owner').value,
+      pp,
+      document.getElementById('f_date').value.trim(),
+      sc,
+      grade || '',
+      gv !== null ? gv : '',
+      sp !== '' ? sp : '',
+      gradedPL,
+      salePL
+    ];
+
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${SHEET_NAME}!A${nextRow}?valueInputOption=USER_ENTERED&key=${API_KEY}`;
+    const res = await fetch(url, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ range: `${SHEET_NAME}!A${nextRow}`, majorDimension: 'ROWS', values: [row] })
+    });
+
+    if (res.ok) {
+      showToast('Saved to row ' + nextRow + '!');
+      clearAll();
+    } else {
+      const err = await res.json();
+      showToast('Error: ' + (err.error?.message || 'Unknown'));
+    }
+  } catch(e) {
+    showToast('Error: ' + e.message);
+  }
+
+  btn.disabled = false;
+  btn.textContent = 'Save to Sheet';
+}
+
+// Set today on load
+window.addEventListener('load', () => {
+  const n = new Date();
+  setVal('f_date', pad(n.getDate())+'.'+pad(n.getMonth()+1)+'.'+n.getFullYear());
+});
+</script>
+</body>
+</html>

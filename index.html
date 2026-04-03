@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="PSA Tracker">
 <title>PSA Tracker</title>
 <style>
@@ -17,33 +16,24 @@
     color: #1c1c1e;
   }
   body::before {
-    content: '';
-    position: fixed;
-    top: -120px; right: -120px;
-    width: 300px; height: 300px;
-    border-radius: 50%;
-    border: 28px solid rgba(255,255,255,0.12);
-    pointer-events: none; z-index: 0;
+    content: ''; position: fixed; top: -120px; right: -120px;
+    width: 300px; height: 300px; border-radius: 50%;
+    border: 28px solid rgba(255,255,255,0.12); pointer-events: none; z-index: 0;
   }
   body::after {
-    content: '';
-    position: fixed;
-    bottom: -80px; left: -80px;
-    width: 200px; height: 200px;
-    border-radius: 50%;
-    border: 20px solid rgba(255,255,255,0.08);
-    pointer-events: none; z-index: 0;
+    content: ''; position: fixed; bottom: -80px; left: -80px;
+    width: 200px; height: 200px; border-radius: 50%;
+    border: 20px solid rgba(255,255,255,0.08); pointer-events: none; z-index: 0;
   }
   header {
-    background: rgba(0,0,0,0.35);
-    padding: 16px 20px 14px;
+    background: rgba(0,0,0,0.35); padding: 16px 20px 14px;
     border-bottom: 2px solid rgba(255,255,255,0.15);
-    position: sticky; top: 0; z-index: 10;
-    backdrop-filter: blur(8px);
+    position: sticky; top: 0; z-index: 10; backdrop-filter: blur(8px);
   }
   header h1 { font-size: 22px; font-weight: 700; color: white; }
   header p { font-size: 13px; color: rgba(255,255,255,0.65); margin-top: 2px; }
   .container { max-width: 480px; margin: 0 auto; padding: 16px; position: relative; z-index: 1; }
+
   #lockScreen {
     display: flex; flex-direction: column; align-items: center;
     justify-content: center; min-height: 70vh; text-align: center; padding: 20px;
@@ -56,63 +46,70 @@
   }
   .pokeball::before {
     content: ''; position: absolute; top: 50%; left: 50%;
-    transform: translate(-50%,-50%);
-    width: 22px; height: 22px; border-radius: 50%;
-    background: white; border: 5px solid #1c1c1e; z-index: 2;
+    transform: translate(-50%,-50%); width: 22px; height: 22px;
+    border-radius: 50%; background: white; border: 5px solid #1c1c1e; z-index: 2;
   }
   .pokeball::after {
-    content: ''; position: absolute;
-    top: calc(50% - 3px); left: 0; right: 0;
+    content: ''; position: absolute; top: calc(50% - 3px); left: 0; right: 0;
     height: 6px; background: #1c1c1e;
   }
   #lockScreen h2 { color: white; font-size: 22px; font-weight: 700; margin-bottom: 6px; }
   #lockScreen p { color: rgba(255,255,255,0.65); font-size: 14px; margin-bottom: 28px; }
   .lock-input {
-    width: 100%; max-width: 280px;
-    padding: 14px 18px; font-size: 18px;
+    width: 100%; max-width: 280px; padding: 14px 18px; font-size: 18px;
     border-radius: 14px; border: 2px solid rgba(255,255,255,0.3);
     background: rgba(255,255,255,0.15); color: white;
     text-align: center; letter-spacing: 4px; outline: none; margin-bottom: 14px;
   }
   .lock-input::placeholder { color: rgba(255,255,255,0.4); letter-spacing: 1px; }
-  .lock-input:focus { border-color: rgba(255,255,255,0.7); background: rgba(255,255,255,0.2); }
+  .lock-input:focus { border-color: rgba(255,255,255,0.7); }
   .lock-btn {
-    width: 100%; max-width: 280px; padding: 14px;
-    font-size: 16px; font-weight: 600; border-radius: 14px;
-    border: none; background: white; color: #cc0000; cursor: pointer;
+    width: 100%; max-width: 280px; padding: 14px; font-size: 16px; font-weight: 600;
+    border-radius: 14px; border: none; background: white; color: #cc0000; cursor: pointer;
   }
-  .lock-btn:active { opacity: 0.85; }
   .lock-error { color: #ffcc00; font-size: 13px; margin-top: 10px; min-height: 18px; font-weight: 500; }
+
   #mainApp { display: none; }
-  .mic-wrap { text-align: center; padding: 20px 0 14px; }
+
+  .mic-wrap { text-align: center; padding: 20px 0 10px; }
   .mic-btn {
-    width: 88px; height: 88px; border-radius: 50%;
+    width: 92px; height: 92px; border-radius: 50%;
     border: 3px solid rgba(255,255,255,0.5);
     background: rgba(255,255,255,0.15); cursor: pointer;
     display: inline-flex; align-items: center; justify-content: center;
-    transition: all 0.2s; -webkit-tap-highlight-color: transparent;
+    transition: border-color 0.2s, background 0.2s;
+    -webkit-tap-highlight-color: transparent; user-select: none; touch-action: manipulation;
   }
-  .mic-btn:active { transform: scale(0.95); }
-  .mic-btn.listening { border-color: #ffcc00; background: rgba(255,204,0,0.2); animation: pulse 1.2s infinite; }
-  .mic-btn svg { width: 36px; height: 36px; color: white; }
-  .mic-btn.listening svg { color: #ffcc00; }
-  @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.07)} }
-  .status { font-size: 14px; color: rgba(255,255,255,0.8); text-align: center; margin-top: 8px; min-height: 20px; }
-  .status.ok { color: #ffcc00; }
-  .status.err { color: #ff9999; }
-  .transcript { font-size: 12px; color: rgba(255,255,255,0.5); text-align: center; min-height: 16px; font-style: italic; margin-top: 4px; padding: 0 20px; }
-  .hint { font-size: 12px; color: rgba(255,255,255,0.5); text-align: center; margin-top: 6px; line-height: 1.6; padding: 0 20px; }
+  .mic-btn.recording { border-color: #ffcc00; background: rgba(255,204,0,0.25); animation: pulse 1s infinite; }
+  .mic-btn.processing { opacity: 0.6; }
+  .mic-btn svg { width: 38px; height: 38px; color: white; }
+  .mic-btn.recording svg { color: #ffcc00; }
+  @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.08)} }
+
+  .mic-label { font-size: 14px; color: rgba(255,255,255,0.8); margin-top: 10px; font-weight: 500; }
+  .mic-label.recording { color: #ffcc00; }
+
+  .status {
+    font-size: 13px; color: rgba(255,255,255,0.6); text-align: center;
+    margin-top: 6px; min-height: 18px; font-style: italic; padding: 0 24px; line-height: 1.5;
+  }
+  .status.ok { color: #ffcc00; font-style: normal; font-weight: 600; }
+  .status.err { color: #ff9999; font-style: normal; }
+
+  .hint {
+    font-size: 12px; color: rgba(255,255,255,0.55); text-align: center;
+    margin: 10px 0 16px; line-height: 1.7; padding: 10px 16px;
+    background: rgba(0,0,0,0.15); border-radius: 10px;
+  }
+
   .card {
-    background: rgba(255,255,255,0.95); border-radius: 16px;
-    overflow: hidden; margin-bottom: 12px;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+    background: rgba(255,255,255,0.96); border-radius: 16px;
+    overflow: hidden; margin-bottom: 12px; box-shadow: 0 4px 16px rgba(0,0,0,0.2);
   }
   .card-title {
     font-size: 11px; font-weight: 700; color: #cc0000;
-    text-transform: uppercase; letter-spacing: 0.8px;
-    padding: 10px 16px 6px;
-    background: rgba(204,0,0,0.06);
-    border-bottom: 1px solid rgba(204,0,0,0.1);
+    text-transform: uppercase; letter-spacing: 0.8px; padding: 10px 16px 6px;
+    background: rgba(204,0,0,0.06); border-bottom: 1px solid rgba(204,0,0,0.1);
   }
   .field { display: flex; align-items: center; padding: 12px 16px; border-top: 0.5px solid #f0f0f0; }
   .field:first-of-type { border-top: none; }
@@ -123,21 +120,23 @@
   }
   .field input::placeholder { color: #c7c7cc; }
   .field select { -webkit-appearance: none; appearance: none; }
+
   .btn-row { display: flex; gap: 10px; margin-top: 4px; }
   .btn {
-    flex: 1; padding: 14px; border-radius: 14px; border: none;
+    flex: 1; padding: 15px; border-radius: 14px; border: none;
     font-size: 16px; font-weight: 600; cursor: pointer;
-    transition: opacity 0.15s; -webkit-tap-highlight-color: transparent;
+    -webkit-tap-highlight-color: transparent; touch-action: manipulation;
   }
-  .btn:active { opacity: 0.75; }
   .btn.secondary { background: rgba(255,255,255,0.2); color: white; border: 2px solid rgba(255,255,255,0.3); }
   .btn.primary { background: #ffcc00; color: #1c1c1e; }
-  .btn.primary:disabled { background: rgba(255,255,255,0.3); color: rgba(255,255,255,0.5); cursor: not-allowed; }
-  .logout { text-align: center; margin-top: 16px; margin-bottom: 8px; }
-  .logout button { background: none; border: none; color: rgba(255,255,255,0.45); font-size: 13px; cursor: pointer; text-decoration: underline; }
+  .btn.primary:disabled { background: rgba(255,255,255,0.3); color: rgba(255,255,255,0.5); }
+
+  .logout { text-align: center; margin-top: 14px; margin-bottom: 20px; }
+  .logout button { background: none; border: none; color: rgba(255,255,255,0.4); font-size: 13px; cursor: pointer; text-decoration: underline; }
+
   .toast {
     position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
-    background: #1c1c1e; color: white; padding: 12px 20px; border-radius: 99px;
+    background: #1c1c1e; color: white; padding: 12px 22px; border-radius: 99px;
     font-size: 14px; font-weight: 500; opacity: 0; transition: opacity 0.3s;
     pointer-events: none; white-space: nowrap; z-index: 100;
   }
@@ -155,14 +154,15 @@
   <div class="pokeball"></div>
   <h2>Welcome back!</h2>
   <p>Enter your password to continue</p>
-  <input class="lock-input" type="password" id="passwordInput" placeholder="Password" onkeydown="if(event.key==='Enter') checkPassword()" />
+  <input class="lock-input" type="password" id="passwordInput" placeholder="Password"
+    onkeydown="if(event.key==='Enter') checkPassword()" autocomplete="current-password" />
   <button class="lock-btn" onclick="checkPassword()">Unlock</button>
   <div class="lock-error" id="lockError"></div>
 </div>
 
 <div class="container" id="mainApp">
   <div class="mic-wrap">
-    <button class="mic-btn" id="micBtn" onclick="toggleListen()">
+    <button class="mic-btn" id="micBtn" onclick="toggleMic()">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
         <rect x="9" y="2" width="6" height="12" rx="3"/>
         <path d="M5 10a7 7 0 0 0 14 0"/>
@@ -170,9 +170,13 @@
         <line x1="8" y1="22" x2="16" y2="22"/>
       </svg>
     </button>
-    <div class="status" id="statusMsg">Tap the mic and speak</div>
-    <div class="transcript" id="transcript"></div>
-    <div class="hint">Say: "Charizard ex, set MEW, 199 slash 165, Pit, 150 euros"</div>
+    <div class="mic-label" id="micLabel">Tap to speak</div>
+    <div class="status" id="statusMsg"></div>
+  </div>
+
+  <div class="hint">
+    Speak naturally — for example:<br>
+    <em>"Charizard ex, MEW set, 199 slash 165, Pit, 150 euros"</em>
   </div>
 
   <div class="card">
@@ -204,18 +208,16 @@
 var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxCt1gsW5EmOtnSKdr8Vel7pLL0Ikl4Wn_DLZJHGsJD2TUc3VRNWvFTKx77fXFO_cCSwg/exec';
 var PASSWORD = 'Kaiya1';
 var recognition = null;
-var listening = false;
+var isRecording = false;
 
 function checkPassword() {
-  var val = document.getElementById('passwordInput').value;
-  if (val === PASSWORD) {
+  if (document.getElementById('passwordInput').value === PASSWORD) {
     document.getElementById('lockScreen').style.display = 'none';
     document.getElementById('mainApp').style.display = 'block';
     document.getElementById('lockError').textContent = '';
   } else {
     document.getElementById('lockError').textContent = 'Incorrect password. Try again.';
     document.getElementById('passwordInput').value = '';
-    document.getElementById('passwordInput').focus();
   }
 }
 
@@ -226,38 +228,95 @@ function logout() {
   clearAll();
 }
 
-function initRecognition() {
+function toggleMic() {
+  if (isRecording) { stopRecording(); return; }
+  startRecording();
+}
+
+function startRecording() {
   var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SR) { setStatus('Voice not supported. Use Chrome.', 'err'); return null; }
-  var r = new SR();
-  r.lang = 'en-US';
-  r.interimResults = true;
-  r.maxAlternatives = 1;
-  r.onresult = function(e) {
-    var t = Array.from(e.results).map(function(r) { return r[0].transcript; }).join('');
-    document.getElementById('transcript').textContent = t;
-    if (e.results[e.results.length - 1].isFinal) { parseVoice(t); stopListen(); }
+  if (!SR) { setStatus('Speech recognition not available.', 'err'); return; }
+
+  recognition = new SR();
+  recognition.lang = 'en-US';
+  recognition.continuous = false;
+  recognition.interimResults = false;
+  recognition.maxAlternatives = 1;
+
+  recognition.onstart = function() {
+    isRecording = true;
+    document.getElementById('micBtn').classList.add('recording');
+    document.getElementById('micLabel').textContent = 'Tap to stop';
+    document.getElementById('micLabel').classList.add('recording');
+    setStatus('Listening...', '');
   };
-  r.onerror = function(e) { setStatus('Mic error: ' + e.error, 'err'); stopListen(); };
-  r.onend = function() { stopListen(); };
-  return r;
+
+  recognition.onresult = function(e) {
+    var transcript = e.results[0][0].transcript;
+    setStatus('"' + transcript + '"', '');
+    sendToAppsScript(transcript);
+  };
+
+  recognition.onerror = function(e) {
+    setStatus('Mic error: ' + e.error + '. Try again.', 'err');
+    resetMic();
+  };
+
+  recognition.onend = function() { resetMic(); };
+
+  try { recognition.start(); }
+  catch(e) { setStatus('Could not start mic. Try again.', 'err'); resetMic(); }
 }
 
-function toggleListen() {
-  if (listening) { stopListen(); return; }
-  if (!recognition) recognition = initRecognition();
-  if (!recognition) return;
-  listening = true;
-  document.getElementById('micBtn').classList.add('listening');
-  setStatus('Listening...');
-  recognition.start();
-}
-
-function stopListen() {
-  listening = false;
-  document.getElementById('micBtn').classList.remove('listening');
+function stopRecording() {
   if (recognition) { try { recognition.stop(); } catch(e) {} }
-  if (document.getElementById('statusMsg').textContent === 'Listening...') setStatus('Tap the mic and speak');
+}
+
+function resetMic() {
+  isRecording = false;
+  document.getElementById('micBtn').classList.remove('recording');
+  document.getElementById('micBtn').classList.remove('processing');
+  document.getElementById('micLabel').textContent = 'Tap to speak';
+  document.getElementById('micLabel').classList.remove('recording');
+}
+
+function sendToAppsScript(transcript) {
+  document.getElementById('micBtn').classList.remove('recording');
+  document.getElementById('micBtn').classList.add('processing');
+  document.getElementById('micLabel').textContent = 'Processing...';
+  setStatus('Claude is reading your message...', '');
+
+  fetch(SCRIPT_URL, {
+    method: 'POST',
+    body: JSON.stringify({ action: 'parseVoice', transcript: transcript })
+  })
+  .then(function(res) { return res.json(); })
+  .then(function(data) {
+    if (data.success && data.data) {
+      fillFields(data.data);
+      setStatus('Got it! Check and correct if needed.', 'ok');
+    } else {
+      setStatus('Could not understand. Please fill in manually.', 'err');
+    }
+    resetMic();
+  })
+  .catch(function(e) {
+    setStatus('Error. Please fill in manually.', 'err');
+    resetMic();
+  });
+}
+
+function fillFields(data) {
+  if (data.cardName) setVal('f_card', data.cardName);
+  if (data.set) setVal('f_set', data.set.toUpperCase());
+  if (data.number) setVal('f_number', data.number);
+  if (data.owner) setVal('f_owner', data.owner);
+  if (data.purchasePrice !== null && data.purchasePrice !== undefined) setVal('f_purchase', data.purchasePrice);
+}
+
+function setVal(id, val) {
+  var el = document.getElementById(id);
+  if (el) el.value = val;
 }
 
 function setStatus(msg, cls) {
@@ -266,36 +325,10 @@ function setStatus(msg, cls) {
   el.className = 'status' + (cls ? ' ' + cls : '');
 }
 
-function parseVoice(text) {
-  var t = text.toLowerCase();
-  if (/\bpit\b/.test(t)) setVal('f_owner', 'P');
-  else if (/\btom\b/.test(t)) setVal('f_owner', 'T');
-  else if (/\bshared\b/.test(t)) setVal('f_owner', 'S');
-  var sm = t.match(/\bset\s+([a-z0-9]+)/i);
-  if (sm) setVal('f_set', sm[1].toUpperCase());
-  var nm = text.match(/(\d+)\s*(?:slash|\/)\s*(\d+)/i);
-  if (nm) setVal('f_number', nm[1]+'/'+nm[2]);
-  var priceRe = /(\d+(?:\.\d+)?)\s*(?:euro|euros|€)/g;
-  var pm; var prices = [];
-  while ((pm = priceRe.exec(t)) !== null) prices.push(parseFloat(pm[1]));
-  if (prices.length >= 1) setVal('f_purchase', prices[0]);
-  var name = text.replace(/\b(pit|tom|shared|set\s+\S+|\d+\s*(?:slash|\/)\s*\d+|\d+(?:\.\d+)?\s*(?:euro|euros|€))\b/gi, '').replace(/\s+/g, ' ').trim();
-  if (name.length > 2) setVal('f_card', name);
-  setStatus('Got it! Check the fields below.', 'ok');
-}
-
-function setVal(id, val) {
-  var el = document.getElementById(id);
-  if (el) el.value = val;
-}
-
-function pad(n) { return String(n).padStart(2,'0'); }
-
 function clearAll() {
   ['f_card','f_set','f_number','f_purchase'].forEach(function(id) { setVal(id, ''); });
   setVal('f_owner', 'P');
-  document.getElementById('transcript').textContent = '';
-  setStatus('Tap the mic and speak');
+  setStatus('', '');
 }
 
 function showToast(msg) {
@@ -309,9 +342,9 @@ function saveToSheet() {
   var card = document.getElementById('f_card').value.trim();
   if (!card) { showToast('Please enter a card name'); return; }
   var btn = document.getElementById('saveBtn');
-  btn.disabled = true;
-  btn.textContent = 'Saving...';
+  btn.disabled = true; btn.textContent = 'Saving...';
   var n = new Date();
+  var pad = function(x) { return String(x).padStart(2,'0'); };
   var today = pad(n.getDate())+'.'+pad(n.getMonth()+1)+'.'+n.getFullYear();
   var payload = {
     cardName: card,
@@ -319,17 +352,14 @@ function saveToSheet() {
     number: document.getElementById('f_number').value.trim(),
     owner: document.getElementById('f_owner').value,
     purchasePrice: document.getElementById('f_purchase').value,
-    submissionCost: '',
-    submissionDate: today,
-    grade: '',
-    gradedValue: '',
-    salePrice: ''
+    submissionCost: '', submissionDate: today,
+    grade: '', gradedValue: '', salePrice: ''
   };
   fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) })
     .then(function(res) { return res.json(); })
     .then(function(data) {
       if (data.success) { showToast('Saved to row ' + data.row + '!'); clearAll(); }
-      else { showToast('Error: ' + (data.error || 'Unknown error')); }
+      else { showToast('Error: ' + (data.error || 'Unknown')); }
     })
     .catch(function(e) { showToast('Error: ' + e.message); })
     .finally(function() { btn.disabled = false; btn.textContent = 'Save to Sheet'; });
